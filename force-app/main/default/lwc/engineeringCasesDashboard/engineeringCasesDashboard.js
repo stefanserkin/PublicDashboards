@@ -1,16 +1,17 @@
 import { LightningElement, wire } from 'lwc';
 import { refreshApex } from "@salesforce/apex";
 import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseStatusCounts';
-// import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
+import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
 
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
     intervalId;
-
     openCasesByStatusConfig;
     closedCasesLastThirtyConfig;
 
+    // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
+    wiredClosedCasesByOwner = [];
 
     /****************************************
      * Lifecycle hooks
@@ -60,6 +61,32 @@ export default class EngineeringCasesDashboard extends LightningElement {
             config.data.datasets.push(dataset);
             // this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
             this.openCasesByStatusConfig = config;
+        } else if (result.error) {
+            this.error = result.error;
+            console.error(this.error);
+        }
+    }
+
+    /**
+     * @description Wire aggregate results of closed cases in last 30 days
+     */
+    @wire(getClosedCasesLastThirtyDays)
+    closedCasesLastThirtyDaysWire(result) {
+        this.wiredClosedCasesByOwner = result;
+        if (result.data) {
+            const config = this.baseConfig('bar');
+            const dataset = {
+                data: [],
+                backgroundColor: [],
+                label: 'Closed Cases'
+            }
+            result.data.forEach(row => {
+                dataset.data.push(row.CaseCount);
+                dataset.backgroundColor.push(this.randomRGB());
+                config.data.labels.push(row.CaseOwner);
+            });
+            config.data.datasets.push(dataset);
+            this.closedCasesLastThirtyConfig = config;
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
@@ -119,6 +146,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
      */
     refreshComponents() {
         refreshApex(this.wiredOpenCasesByStatus);
+        refreshApex(this.wiredClosedCasesByOwner);
     }
 
 }
