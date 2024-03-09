@@ -1,0 +1,8 @@
+<template>
+    <lightning-card title={chartTitle}>
+        <div class="chart slds-var-m-around_medium" lwc:dom="manual"></div>
+        <template lwc:if={error}>
+            {error.message}
+        </template>
+    </lightning-card>
+</template>

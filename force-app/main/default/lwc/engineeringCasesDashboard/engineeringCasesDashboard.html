@@ -1,0 +1,25 @@
+<template>
+    <lightning-card title="Charts and Numbers and Such" icon-name="custom:custom19">
+        <lightning-layout>
+            <!-- OPEN CASES BY STATUS -->
+            <lightning-layout-item>
+                <c-eng-dash-open-cases-by-status
+                    chart-title="Open Cases by Status"
+                ></c-eng-dash-open-cases-by-status>
+            </lightning-layout-item>
+            <!-- CLOSED CASES LAST 30 DAYS -->
+            <lightning-layout-item>
+                <c-eng-dash-cases-closed-last-30
+                    chart-title="Cases Closed - Last 30 Days"
+                ></c-eng-dash-cases-closed-last-30>
+            </lightning-layout-item>
+            <!-- OPEN CASES BY STATUS USING CUSTOM CHART -->
+            <lightning-layout-item>
+                <c-custom-chart lwc:if={openCasesByStatusConfig}
+                    config={openCasesByStatusConfig}
+                    chart-title="Open Cases by Status"
+                ></c-custom-chart>
+            </lightning-layout-item>
+        </lightning-layout>
+    </lightning-card>
+</template>
