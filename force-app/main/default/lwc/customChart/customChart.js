@@ -1,7 +1,7 @@
 import { LightningElement, api } from 'lwc';
-import chartjs from '@salesforce/resourceUrl/ChartJs';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import chartjs from '@salesforce/resourceUrl/ChartJs';
 import saveAsImage from '@salesforce/apex/CasesDashboardController.saveAsImage';
 
 /**
@@ -16,6 +16,15 @@ import saveAsImage from '@salesforce/apex/CasesDashboardController.saveAsImage';
  */
 
 export default class CustomChart extends LightningElement {
+
+    // Name the chart component's lightning card
+    @api chartTitle;
+    // Show/hide download image button-icon
+    @api showDownload = false;
+
+    /**
+     * Use getter/setter for config to ensure chart data is recreated when it changes
+     */
     _config;
     @api 
     set config(value) {
@@ -28,20 +37,17 @@ export default class CustomChart extends LightningElement {
         return this._config;
     }
 
-    @api chartTitle;
-    @api showDownload = false;
-
     error;
     chart;
     chartjsInitialized = false;
 
+    /**
+     * @description Called every time the component is rendered, after the DOM is available.
+     */
     async renderedCallback() {
         if (this.chartjsInitialized) {
-            console.log('chartjs is initialized');
             return;
         }
-
-        console.log('show download --> ', this.showDownload);
         
         Promise.all([loadScript(this, chartjs)])
             .then(() => {
@@ -60,6 +66,10 @@ export default class CustomChart extends LightningElement {
             });
     }
 
+    /**
+     * @description Updates the chart with the latest data from the API
+     * @returns void
+     */
     updateChart() {
         if (this.chart) {
             this.chart.destroy();
@@ -72,6 +82,11 @@ export default class CustomChart extends LightningElement {
         this.chart = new window.Chart(ctx, JSON.parse(JSON.stringify(this._config)));
     }
 
+    /**
+     * @description Generates a base64 image of the chart and saves it as a file
+     * TODO - Do something about the result - download image to browser? just tell the user it worked? Something.
+     * @returns {Promise}
+     */
     async generateImage() {
         const image = this.chart.toBase64Image();
         console.log(image);

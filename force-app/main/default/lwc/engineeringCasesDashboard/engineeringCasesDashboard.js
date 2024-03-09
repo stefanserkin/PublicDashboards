@@ -11,21 +11,39 @@ export default class EngineeringCasesDashboard extends LightningElement {
     closedCasesLastThirtyConfig;
 
     wiredOpenCasesByStatus = [];
-    showDownload = false;
 
+    /****************************************
+     * Lifecycle hooks
+     ****************************************/
+
+    /**
+     * @description When component is connected to the DOM, start the refresh interval
+     * to automatically update the charts.
+     */
     connectedCallback() {
-        console.log('setting interval for refreshes');
         this.intervalId = setInterval(() => {
             this.refreshComponents();
         }, 5000);
     }
 
     /**
+     * @description Clear interval id from set interval when component is disconnected
+     */
+    disconnectedCallback() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+    }
+
+    /****************************************
+     * Get data
+     ****************************************/
+
+    /**
      * @description Wire aggregate results of open cases by case status
      */
     @wire(getOpenCaseStatusCounts)
     openCasesByStatusWire(result) {
-        console.log(':::: wire called...');
         this.wiredOpenCasesByStatus = result;
         if (result.data) {
             const config = this.baseConfig('doughnut');
@@ -40,19 +58,17 @@ export default class EngineeringCasesDashboard extends LightningElement {
                 config.data.labels.push(row.Status);
             });
             config.data.datasets.push(dataset);
-            this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
-            // this.openCasesByStatusConfig = config;
-            console.log('::: open status config in custom chart --> ', JSON.stringify(this.openCasesByStatusConfig));
+            // this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
+            this.openCasesByStatusConfig = config;
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
         }
     }
 
-    refreshComponents() {
-        console.log(':::: refreshing component...');
-        refreshApex(this.wiredOpenCasesByStatus);
-    }
+    /****************************************
+     * Utilities
+     ****************************************/
 
     /**
      * @description Provides a base configuration, without any datasets, for a given chart type
@@ -98,10 +114,11 @@ export default class EngineeringCasesDashboard extends LightningElement {
         return "rgb(" + r + "," + g + "," + b + ")";
     }
 
-    disconnectedCallback() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-        }
+    /**
+     * @description Refresh wired results
+     */
+    refreshComponents() {
+        refreshApex(this.wiredOpenCasesByStatus);
     }
 
 }
