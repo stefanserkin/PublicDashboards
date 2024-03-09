@@ -15,26 +15,34 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
  */
 
 export default class CustomChart extends LightningElement {
-    @api config;
+    _config;
+    @api 
+    set config(value) {
+        this._config = value;
+        if (this.chartjsInitialized) {
+            this.updateChart();
+        }
+    }
+    get config() {
+        return this._config;
+    }
+
     @api chartTitle;
+
     error;
     chart;
     chartjsInitialized = false;
 
     async renderedCallback() {
         if (this.chartjsInitialized) {
-            console.log('chartjs not yet initialized');
+            console.log('chartjs is initialized');
             return;
         }
         
         Promise.all([loadScript(this, chartjs)])
             .then(() => {
                 this.chartjsInitialized = true;
-
-                const canvas = document.createElement('canvas');
-                this.template.querySelector('div.chart').appendChild(canvas);
-                const ctx = canvas.getContext('2d');
-                this.chart = new window.Chart(ctx, JSON.parse(JSON.stringify(this.config)));
+                this.updateChart();
             })
             .catch(error => {
                 this.error = error;
@@ -46,6 +54,18 @@ export default class CustomChart extends LightningElement {
                     })
                 );
             });
+    }
+
+    updateChart() {
+        if (this.chart) {
+            this.chart.destroy();
+        }
+        const canvas = this.template.querySelector('canvas') || document.createElement('canvas');
+        if (!this.template.querySelector('canvas')) {
+            this.template.querySelector('div.chart').appendChild(canvas);
+        }
+        const ctx = canvas.getContext('2d');
+        this.chart = new window.Chart(ctx, JSON.parse(JSON.stringify(this._config)));
     }
 
 }

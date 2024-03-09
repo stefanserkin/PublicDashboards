@@ -1,18 +1,31 @@
 import { LightningElement, wire } from 'lwc';
+import { refreshApex } from "@salesforce/apex";
 import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseStatusCounts';
 // import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
 
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
+    intervalId;
 
     openCasesByStatusConfig;
     closedCasesLastThirtyConfig;
+
+    wiredOpenCasesByStatus = [];
+
+    connectedCallback() {
+        console.log('setting interval for refreshes');
+        this.intervalId = setInterval(() => {
+            this.refreshComponents();
+        }, 5000);
+    }
 
     /**
      * @description Wire aggregate results of open cases by case status
      */
     @wire(getOpenCaseStatusCounts)
     openCasesByStatusWire(result) {
+        console.log(':::: wire called...');
+        this.wiredOpenCasesByStatus = result;
         if (result.data) {
             const config = this.baseConfig('doughnut');
             const dataset = {
@@ -26,13 +39,18 @@ export default class EngineeringCasesDashboard extends LightningElement {
                 config.data.labels.push(row.Status);
             });
             config.data.datasets.push(dataset);
-            // this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
-            this.openCasesByStatusConfig = config;
+            this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
+            // this.openCasesByStatusConfig = config;
             console.log('::: open status config in custom chart --> ', JSON.stringify(this.openCasesByStatusConfig));
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
         }
+    }
+
+    refreshComponents() {
+        console.log(':::: refreshing component...');
+        refreshApex(this.wiredOpenCasesByStatus);
     }
 
     /**
@@ -77,6 +95,12 @@ export default class EngineeringCasesDashboard extends LightningElement {
         var g = Math.floor(Math.random() * 256);
         var b = Math.floor(Math.random() * 256);
         return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    disconnectedCallback() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
     }
 
 }

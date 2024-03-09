@@ -1,5 +1,12 @@
 <template>
     <lightning-card title="Charts and Numbers and Such" icon-name="custom:custom19">
+        <div slot="actions">
+            <lightning-button
+                title="Refresh"
+                label="Refresh"
+                onclick={refreshComponents}
+            ></lightning-button>
+        </div>
         <lightning-layout>
             <!-- OPEN CASES BY STATUS -->
             <lightning-layout-item>
