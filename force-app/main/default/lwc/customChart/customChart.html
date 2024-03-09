@@ -1,5 +1,15 @@
 <template>
     <lightning-card title={chartTitle}>
+        <div slot="actions">
+            <template if:true={showDownload}>
+                <lightning-button-icon
+                    title="Download"
+                    icon-name="utility:download"
+                    size="small"
+                    onclick={generateImage}
+                ></lightning-button-icon>
+            </template>
+        </div>
         <div class="chart slds-var-m-around_medium" lwc:dom="manual"></div>
         <template lwc:if={error}>
             {error.message}

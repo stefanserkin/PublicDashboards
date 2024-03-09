@@ -11,6 +11,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     closedCasesLastThirtyConfig;
 
     wiredOpenCasesByStatus = [];
+    showDownload = false;
 
     connectedCallback() {
         console.log('setting interval for refreshes');

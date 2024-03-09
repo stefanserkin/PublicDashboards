@@ -2,6 +2,7 @@ import { LightningElement, api } from 'lwc';
 import chartjs from '@salesforce/resourceUrl/ChartJs';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import saveAsImage from '@salesforce/apex/CasesDashboardController.saveAsImage';
 
 /**
  * When using this component in an LWR site, please import the below custom implementation of 'loadScript' module
@@ -28,6 +29,7 @@ export default class CustomChart extends LightningElement {
     }
 
     @api chartTitle;
+    @api showDownload = false;
 
     error;
     chart;
@@ -38,6 +40,8 @@ export default class CustomChart extends LightningElement {
             console.log('chartjs is initialized');
             return;
         }
+
+        console.log('show download --> ', this.showDownload);
         
         Promise.all([loadScript(this, chartjs)])
             .then(() => {
@@ -66,6 +70,15 @@ export default class CustomChart extends LightningElement {
         }
         const ctx = canvas.getContext('2d');
         this.chart = new window.Chart(ctx, JSON.parse(JSON.stringify(this._config)));
+    }
+
+    async generateImage() {
+        const image = this.chart.toBase64Image();
+        console.log(image);
+        const saveResult = await saveAsImage({
+            base64: image.split(',')[1], 
+            fileName: `${this.chartTitle}`
+        });
     }
 
 }

@@ -26,4 +26,22 @@ public without sharing class CasesDashboardController {
         ];
     }
 
+    @AuraEnabled
+    public static String saveAsImage(
+        String base64,
+        String fileName
+    ) {
+        try {
+            ContentVersion cv = new ContentVersion();
+            cv.VersionData = EncodingUtil.base64Decode(base64);
+            cv.Title = filename;
+            cv.PathOnClient = filename + '.png';
+      
+            insert cv;
+            return String.valueOf(cv.Id);
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
 }
