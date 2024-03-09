@@ -1,4 +1,4 @@
-public with sharing class CasesDashboardController {
+public without sharing class CasesDashboardController {
     
     @AuraEnabled(cacheable=true)
     public static List<AggregateResult> getOpenCaseStatusCounts() {
