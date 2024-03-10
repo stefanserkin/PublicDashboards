@@ -1,4 +1,14 @@
+/*********************************************
+ * @description Controller for the public dashboards around cases.
+ *  Results are currently hard-coded to the Engineering record type
+ * 
+ * @date 2024
+ *********************************************/
 public without sharing class CasesDashboardController {
+
+    /*********************************************
+     * Queries
+     *********************************************/
     
     @AuraEnabled(cacheable=true)
     public static List<AggregateResult> getOpenCaseStatusCounts() {
@@ -80,6 +90,12 @@ public without sharing class CasesDashboardController {
         ];
     }
 
+    /*********************************************
+     * @description Saves a base64 encoded image as a ContentVersion in Salesforce.
+     * @param base64 Base64 encoded string of the image
+     * @param fileName Name of the file to be saved
+     * @return Id of the created ContentVersion record
+     *********************************************/
     @AuraEnabled
     public static String saveAsImage(
         String base64,
@@ -91,7 +107,7 @@ public without sharing class CasesDashboardController {
             cv.Title = filename;
             cv.PathOnClient = filename + '.png';
       
-            insert cv;
+            Database.insert(cv, AccessLevel.SYSTEM_MODE);
             return String.valueOf(cv.Id);
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
