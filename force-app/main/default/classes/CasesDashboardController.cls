@@ -1,6 +1,10 @@
 /*********************************************
  * @description Controller for the public dashboards around cases.
- *  Results are currently hard-coded to the Engineering record type
+ *  Results are currently hard-coded to the Engineering record type.
+ * 
+ * IMPORTANT - Do not include other case record types in here without careful consideration 
+ *            as this may return cases of record types that are not publicly available. 
+ *            Only aggregate queries should be implemented in this class.
  * 
  * @date 2024
  *********************************************/
