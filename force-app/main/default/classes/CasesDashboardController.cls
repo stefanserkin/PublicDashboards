@@ -13,6 +13,19 @@ public without sharing class CasesDashboardController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getOpenCaseOwnerCounts() {
+        return [
+            SELECT Owner.Name CaseOwner, Status, COUNT(Id) CaseCount 
+              FROM Case 
+             WHERE RecordType.Name = 'Engineering' 
+               AND IsClosed = false
+              WITH SYSTEM_MODE
+             GROUP BY Owner.Name, Status
+             ORDER BY COUNT(Id) DESC
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<AggregateResult> getClosedCasesLastThirtyDays() {
         return [
             SELECT Owner.Name CaseOwner, COUNT(Id) CaseCount 
