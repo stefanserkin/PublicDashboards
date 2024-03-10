@@ -39,6 +39,7 @@ export default class DashboardChart extends LightningElement {
     error;
     chart;
     chartjsInitialized = false;
+    isLoading = false;
 
     /**
      * @description Called every time the component is rendered, after the DOM is available.
@@ -88,6 +89,7 @@ export default class DashboardChart extends LightningElement {
      * @returns {Promise}
      */
     async generateImage() {
+        this.isLoading = true;
         const image = this.chart.toBase64Image();
         console.log(image);
         const saveResult = await saveAsImage({
@@ -102,6 +104,7 @@ export default class DashboardChart extends LightningElement {
                     variant: 'success',
                 })
             );
+            this.isLoading = false;
         }
     }
 

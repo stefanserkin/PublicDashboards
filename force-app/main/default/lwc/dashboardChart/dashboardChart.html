@@ -1,7 +1,16 @@
 <template>
     <lightning-card title={title}>
+        <!-- SPINNER ON LOAD -->
+        <lightning-spinner lwc:if={isLoading}
+            alternative-text="Loading..."
+            title="Loading..."
+            size="medium"
+            variant="brand"
+        ></lightning-spinner>
+
+        <!-- ACTIONS -->
         <div slot="actions">
-            <template if:true={showDownload}>
+            <template lwc:if={showDownload}>
                 <lightning-button-icon
                     title="Download"
                     icon-name="utility:download"
@@ -10,7 +19,11 @@
                 ></lightning-button-icon>
             </template>
         </div>
+
+        <!-- CHART -->
         <div class="chart slds-var-m-around_medium" lwc:dom="manual"></div>
+
+        <!-- ERROR PANEL -->
         <template lwc:if={error}>
             {error.message}
         </template>
