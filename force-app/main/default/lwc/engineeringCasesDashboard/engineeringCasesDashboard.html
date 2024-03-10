@@ -76,5 +76,17 @@
                 ></c-dashboard-chart>
             </lightning-layout-item>
         </lightning-layout>
+        
+        <!-- ROW 3 -->
+        <lightning-layout>
+            <!-- OPEN CASES BY FACILITY -->
+            <lightning-layout-item size="4">
+                <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
+                    config={openCasesByFacilityConfig}
+                    title="Open Cases by Facility"
+                    show-download
+                ></c-dashboard-chart>
+            </lightning-layout-item>
+        </lightning-layout>
     </lightning-card>
 </template>

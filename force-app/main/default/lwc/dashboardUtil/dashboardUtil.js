@@ -83,7 +83,8 @@ const getUnstackedData = (rows, groupProperty, valueProperty, label) => {
     rows.forEach(row => {
         dataset.data.push(row[valueProperty]);
         dataset.backgroundColor.push(randomRGB());
-        labels.push(row[groupProperty]);
+        const groupVal = row[groupProperty] != null ? row[groupProperty] : '-';
+        labels.push(groupVal);
     });
     return {
         labels: labels,
@@ -106,7 +107,7 @@ const getStackedData = (rows, groupingProperty, subGroupingProperty, countProper
     let counts = {}; // { groupingVal: { subGroupingVal: count } }
 
     rows.forEach(row => {
-        let groupingVal = row[groupingProperty];
+        let groupingVal = row[groupingProperty] != null ? row[groupingProperty] : '-';
         let subGroupingVal = row[subGroupingProperty];
         let count = row[countProperty];
         groupingVals.add(groupingVal);
