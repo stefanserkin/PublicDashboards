@@ -16,8 +16,8 @@
                 <c-dashboard-metric
                     title="Open Cases"
                     value={totalOpenCases}
-                    min-mid-range=10
-                    min-top-range=20
+                    min-mid-range=1
+                    min-top-range=1
                     less-is-more
                 ></c-dashboard-metric>
             </lightning-layout-item>
@@ -26,6 +26,9 @@
                 <c-dashboard-metric
                     title="Cases In Progress"
                     value={totalInProgressCases}
+                    min-mid-range=1
+                    min-top-range=1
+                    less-is-more
                 ></c-dashboard-metric>
             </lightning-layout-item>
             <!-- UNASSIGNED CASES TOTAL -->
@@ -33,6 +36,9 @@
                 <c-dashboard-metric
                     title="Unassigned Cases"
                     value={totalUnassignedCases}
+                    min-mid-range=1
+                    min-top-range=1
+                    less-is-more
                 ></c-dashboard-metric>
             </lightning-layout-item>
             <!-- AWAITING REPLY CASES TOTAL -->
@@ -40,6 +46,9 @@
                 <c-dashboard-metric
                     title="Cases Awaiting Reply"
                     value={totalAwaitingReplyCases}
+                    min-mid-range=1
+                    min-top-range=1
+                    less-is-more
                 ></c-dashboard-metric>
             </lightning-layout-item>
             <!-- OPEN CASES BY STATUS -->
