@@ -6,12 +6,22 @@ import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardControl
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
     intervalId;
-    openCasesByStatusConfig;
-    closedCasesLastThirtyConfig;
 
     // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
+    wiredOpenCasesByOwner = [];
     wiredClosedCasesByOwner = [];
+
+    // Chart configurations
+    openCasesByStatusConfig;
+    openCasesByOwnerConfig;
+    closedCasesLastThirtyConfig;
+
+    // Totals for metric components
+    totalOpenCases = 0;
+    totalUnassignedCases = 0;
+    totalInProgressCases = 0;
+    totalAwaitingReplyCases = 0;
 
     /****************************************
      * Lifecycle hooks
@@ -47,20 +57,21 @@ export default class EngineeringCasesDashboard extends LightningElement {
     openCasesByStatusWire(result) {
         this.wiredOpenCasesByStatus = result;
         if (result.data) {
+            let rows = JSON.parse(JSON.stringify(result.data));
             const config = this.baseConfig('doughnut');
             const dataset = {
                 data: [],
                 backgroundColor: [],
                 label: 'Open Cases'
             }
-            result.data.forEach(row => {
+            rows.forEach(row => {
                 dataset.data.push(row.CaseCount);
                 dataset.backgroundColor.push(this.randomRGB());
                 config.data.labels.push(row.Status);
             });
             config.data.datasets.push(dataset);
-            // this.openCasesByStatusConfig = JSON.parse(JSON.stringify(config));
             this.openCasesByStatusConfig = config;
+            this.calculateTotalOpenCasesByStatus(rows);
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
@@ -68,19 +79,45 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of closed cases in last 30 days
+     * Recalculate totals of open cases for metric charts
+     * @param {Array} rows 
+     */
+    calculateTotalOpenCasesByStatus(rows) {
+        this.totalOpenCases = 0;
+        this.totalUnassignedCases = 0;
+        this.totalInProgressCases = 0;
+        this.totalAwaitingReplyCases = 0;
+
+        rows.forEach(row => {
+            this.totalOpenCases += row.CaseCount;
+            switch(row.Status) {
+                case 'New':
+                    this.totalUnassignedCases += row.CaseCount;
+                    break;
+                case 'In Progress':
+                    this.totalInProgressCases += row.CaseCount;
+                    break;
+                case 'Awaiting Reply':
+                    this.totalAwaitingReplyCases += row.CaseCount;
+            }
+        });
+    }
+
+    /**
+     * @description Wire aggregate results of closed cases in last 30 days by owner
      */
     @wire(getClosedCasesLastThirtyDays)
     closedCasesLastThirtyDaysWire(result) {
         this.wiredClosedCasesByOwner = result;
         if (result.data) {
-            const config = this.baseConfig('bar');
+            let rows = JSON.parse(JSON.stringify(result.data));
+            const config = this.baseConfig('horizontalBar');
             const dataset = {
                 data: [],
                 backgroundColor: [],
                 label: 'Closed Cases'
             }
-            result.data.forEach(row => {
+            rows.forEach(row => {
                 dataset.data.push(row.CaseCount);
                 dataset.backgroundColor.push(this.randomRGB());
                 config.data.labels.push(row.CaseOwner);
@@ -91,6 +128,41 @@ export default class EngineeringCasesDashboard extends LightningElement {
             this.error = result.error;
             console.error(this.error);
         }
+    }
+
+    /**
+     * @description Wire aggregate results of open cases by owner
+     */
+    @wire(getClosedCasesLastThirtyDays)
+    closedCasesLastThirtyDaysWire(result) {
+        this.wiredOpenCasesByOwner = result;
+        if (result.data) {
+            let rows = JSON.parse(JSON.stringify(result.data));
+            const config = this.baseConfig('horizontalBar');
+            const dataset = {
+                data: [],
+                backgroundColor: [],
+                label: 'Closed Cases'
+            }
+            rows.forEach(row => {
+                dataset.data.push(row.CaseCount);
+                dataset.backgroundColor.push(this.randomRGB());
+                config.data.labels.push(row.CaseOwner);
+            });
+            config.data.datasets.push(dataset);
+            this.closedCasesLastThirtyConfig = config;
+        } else if (result.error) {
+            this.error = result.error;
+            console.error(this.error);
+        }
+    }
+
+    /**
+     * @description Refresh wired results
+     */
+    refreshComponents() {
+        refreshApex(this.wiredOpenCasesByStatus);
+        refreshApex(this.wiredClosedCasesByOwner);
     }
 
     /****************************************
@@ -119,11 +191,31 @@ export default class EngineeringCasesDashboard extends LightningElement {
             }
         };
 
-        // Add animations by chart type
+        // Add options by chart type
         if (chartType === 'doughnut') {
             chartConfig.options.animation = {
                  animateRotate: false,
                  animateScale: true
+            };
+        }
+        else if (chartType === 'bar') {
+            chartConfig.options.scales = {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }]
+            };
+        }
+        else if (chartType === 'horizontalBar') {
+            chartConfig.options.scales = {
+                xAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }]
             };
         }
 
@@ -139,14 +231,6 @@ export default class EngineeringCasesDashboard extends LightningElement {
         var g = Math.floor(Math.random() * 256);
         var b = Math.floor(Math.random() * 256);
         return "rgb(" + r + "," + g + "," + b + ")";
-    }
-
-    /**
-     * @description Refresh wired results
-     */
-    refreshComponents() {
-        refreshApex(this.wiredOpenCasesByStatus);
-        refreshApex(this.wiredClosedCasesByOwner);
     }
 
 }

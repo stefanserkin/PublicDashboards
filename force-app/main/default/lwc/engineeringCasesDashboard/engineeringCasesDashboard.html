@@ -1,5 +1,6 @@
 <template>
     <lightning-card title="Charts and Numbers and Such" icon-name="custom:custom19">
+        <!-- ACTIONS -->
         <div slot="actions">
             <lightning-button
                 title="Refresh"
@@ -7,22 +8,64 @@
                 onclick={refreshComponents}
             ></lightning-button>
         </div>
+
+        <!-- ROW 1 -->
         <lightning-layout>
-            <!-- OPEN CASES BY STATUS USING CUSTOM CHART -->
-            <lightning-layout-item>
-                <c-custom-chart lwc:if={openCasesByStatusConfig}
-                    config={openCasesByStatusConfig}
-                    chart-title="Open Cases by Status"
-                    show-download
-                ></c-custom-chart>
+            <!-- OPEN CASES TOTAL -->
+            <lightning-layout-item size="2">
+                <c-dashboard-metric
+                    title="Open Cases"
+                    value={totalOpenCases}
+                ></c-dashboard-metric>
             </lightning-layout-item>
-            <!-- CLOSED CASES BY OWNER USING CUSTOM CHART -->
-            <lightning-layout-item>
-                <c-custom-chart lwc:if={closedCasesLastThirtyConfig}
-                    config={closedCasesLastThirtyConfig}
-                    chart-title="Closed Cases by Case Owner"
+            <!-- IN PROGRESS CASES TOTAL -->
+            <lightning-layout-item size="2">
+                <c-dashboard-metric
+                    title="Cases In Progress"
+                    value={totalInProgressCases}
+                ></c-dashboard-metric>
+            </lightning-layout-item>
+            <!-- UNASSIGNED CASES TOTAL -->
+            <lightning-layout-item size="2">
+                <c-dashboard-metric
+                    title="Unassigned Cases"
+                    value={totalUnassignedCases}
+                ></c-dashboard-metric>
+            </lightning-layout-item>
+            <!-- AWAITING REPLY CASES TOTAL -->
+            <lightning-layout-item size="2">
+                <c-dashboard-metric
+                    title="Cases Awaiting Reply"
+                    value={totalAwaitingReplyCases}
+                ></c-dashboard-metric>
+            </lightning-layout-item>
+            <!-- OPEN CASES BY STATUS -->
+            <lightning-layout-item size="4">
+                <c-dashboard-chart lwc:if={openCasesByStatusConfig}
+                    config={openCasesByStatusConfig}
+                    title="Open Cases by Status"
                     show-download
-                ></c-custom-chart>
+                ></c-dashboard-chart>
+            </lightning-layout-item>
+        </lightning-layout>
+
+        <!-- ROW 2 -->
+        <lightning-layout>
+            <!-- ASSIGNED CASES BY ENGINEER -->
+            <lightning-layout-item size="4">
+                <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
+                    config={closedCasesLastThirtyConfig}
+                    title="Closed Cases by Case Owner"
+                    show-download
+                ></c-dashboard-chart>
+            </lightning-layout-item>
+            <!-- CLOSED CASES BY OWNER -->
+            <lightning-layout-item size="4">
+                <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
+                    config={closedCasesLastThirtyConfig}
+                    title="Closed Cases by Case Owner"
+                    show-download
+                ></c-dashboard-chart>
             </lightning-layout-item>
         </lightning-layout>
     </lightning-card>
