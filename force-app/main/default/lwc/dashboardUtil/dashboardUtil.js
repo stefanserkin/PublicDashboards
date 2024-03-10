@@ -25,11 +25,12 @@ const baseConfig = (chartType, stacked = false) => {
     };
 
     // Add options by chart type
-    if (chartType === 'doughnut') {
+    if (chartType === 'doughnut' || chartType === 'pie') {
         chartConfig.options.animation = {
-             animateRotate: false,
-             animateScale: true
+            animateRotate: true,
+            animateScale: true
         };
+        chartConfig.options.cutoutPercentage = chartType === 'doughnut' ? 25 : 0;
     }
     else if (chartType === 'bar') {
         chartConfig.options.scales = {
