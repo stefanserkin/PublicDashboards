@@ -5,7 +5,7 @@ export default class DashboardMetric extends LightningElement {
     @api value;
 
     get valueStyle() {
-        const colorStyle = this.value > 0 ? 'slds-text-color_error' : 'slds-text-color_success';
+        const colorStyle = this.value > 0 ? 'slds-text-color_destructive' : 'slds-text-color_success';
         return `dash-metric-value ${colorStyle}`;
     }
 }

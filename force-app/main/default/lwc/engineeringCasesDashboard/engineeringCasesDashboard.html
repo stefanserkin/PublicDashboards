@@ -1,5 +1,5 @@
 <template>
-    <lightning-card title="Charts and Numbers and Such" icon-name="custom:custom19">
+    <lightning-card title="Engineering Cases Dashboard" icon-name="standard:service_report">
         <!-- ACTIONS -->
         <div slot="actions">
             <lightning-button
@@ -55,15 +55,15 @@
             <lightning-layout-item size="4">
                 <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
                     config={closedCasesLastThirtyConfig}
-                    title="Closed Cases by Case Owner"
+                    title="Closed Cases - Last 30 Days"
                     show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
             <!-- CLOSED CASES BY OWNER -->
             <lightning-layout-item size="4">
-                <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
-                    config={closedCasesLastThirtyConfig}
-                    title="Closed Cases by Case Owner"
+                <c-dashboard-chart lwc:if={openCasesByOwnerConfig}
+                    config={openCasesByOwnerConfig}
+                    title="Assigned Cases"
                     show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>

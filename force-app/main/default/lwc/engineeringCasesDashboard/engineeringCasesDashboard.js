@@ -1,6 +1,7 @@
 import { LightningElement, wire } from 'lwc';
 import { refreshApex } from "@salesforce/apex";
 import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseStatusCounts';
+import getOpenCaseOwnerCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseOwnerCounts';
 import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
 
 export default class EngineeringCasesDashboard extends LightningElement {
@@ -133,24 +134,56 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of open cases by owner
      */
-    @wire(getClosedCasesLastThirtyDays)
-    closedCasesLastThirtyDaysWire(result) {
+    @wire(getOpenCaseOwnerCounts)
+    openCasesByOwnerWire(result) {
         this.wiredOpenCasesByOwner = result;
         if (result.data) {
             let rows = JSON.parse(JSON.stringify(result.data));
-            const config = this.baseConfig('horizontalBar');
-            const dataset = {
-                data: [],
-                backgroundColor: [],
-                label: 'Closed Cases'
-            }
+            
+            // Create sets and counts object to track unique owner/status combos
+            let owners = new Set();
+            let statuses = new Set();
+            let counts = {}; // { owner: { status: count } }
+
             rows.forEach(row => {
-                dataset.data.push(row.CaseCount);
-                dataset.backgroundColor.push(this.randomRGB());
-                config.data.labels.push(row.CaseOwner);
+                let owner = row.CaseOwner;
+                let status = row.Status;
+                let count = row.CaseCount;
+        
+                owners.add(owner);
+                statuses.add(status);
+        
+                if (!counts[owner]) {
+                    counts[owner] = {};
+                }
+        
+                counts[owner][status] = count;
             });
-            config.data.datasets.push(dataset);
-            this.closedCasesLastThirtyConfig = config;
+
+            // Convert to arrays to iterate with map
+            owners = Array.from(owners);
+            statuses = Array.from(statuses);
+
+            // Create datasets
+            let datasets = statuses.map(status => ({
+                label: status,
+                data: owners.map(owner => (counts[owner] && counts[owner][status]) ? counts[owner][status] : 0),
+                backgroundColor: this.randomRGB(),
+                stack: 'Stack 0',
+            }));
+
+            // Create chart config for stacked bar chart
+            const config = this.baseConfig('horizontalBar');
+            config.data.datasets = datasets;
+            config.data.labels = [...owners];
+            config.options.scales = {
+                x: { 
+                    stacked: true, 
+                    beginAtZero: true 
+                },
+                y: { stacked: true }
+            }
+            this.openCasesByOwnerConfig = config;
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
@@ -162,6 +195,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
      */
     refreshComponents() {
         refreshApex(this.wiredOpenCasesByStatus);
+        refreshApex(this.wiredOpenCasesByOwner);
         refreshApex(this.wiredClosedCasesByOwner);
     }
 
@@ -230,7 +264,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
         var r = Math.floor(Math.random() * 256);
         var g = Math.floor(Math.random() * 256);
         var b = Math.floor(Math.random() * 256);
-        return "rgb(" + r + "," + g + "," + b + ")";
+        return `rgb(${r},${g},${b})`;
     }
 
 }

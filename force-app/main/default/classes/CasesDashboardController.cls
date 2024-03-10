@@ -18,7 +18,8 @@ public without sharing class CasesDashboardController {
             SELECT Owner.Name CaseOwner, Status, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false
+               AND IsClosed = false 
+               AND Owner.Type = 'User'
               WITH SYSTEM_MODE
              GROUP BY Owner.Name, Status
              ORDER BY COUNT(Id) DESC
