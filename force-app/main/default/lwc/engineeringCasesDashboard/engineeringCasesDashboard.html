@@ -80,10 +80,18 @@
         <!-- ROW 3 -->
         <lightning-layout>
             <!-- OPEN CASES BY FACILITY -->
-            <lightning-layout-item size="4">
+            <lightning-layout-item size="6">
                 <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
                     config={openCasesByFacilityConfig}
                     title="Open Cases by Facility"
+                    show-download
+                ></c-dashboard-chart>
+            </lightning-layout-item>
+            <!-- OPEN CASES BY TYPE -->
+            <lightning-layout-item size="6">
+                <c-dashboard-chart lwc:if={openCasesByTypeConfig}
+                    config={openCasesByTypeConfig}
+                    title="Open Cases by Type"
                     show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>

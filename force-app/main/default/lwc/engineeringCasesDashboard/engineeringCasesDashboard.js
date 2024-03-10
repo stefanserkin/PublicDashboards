@@ -9,17 +9,21 @@ import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.g
 import getOpenCaseOwnerCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseOwnerCounts';
 import getOpenCasePriorityCounts from '@salesforce/apex/CasesDashboardController.getOpenCasePriorityCounts';
 import getOpenCaseFacilityCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseFacilityCounts';
+import getOpenCaseTypeCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseTypeCounts';
 import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
 
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
     intervalId;
 
+    locationNames = ['Upper East Side','Battery Park City'];
+
     // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
     wiredOpenCasesByOwner = [];
     wiredOpenCasesByPriority = [];
     wiredOpenCasesByFacility = [];
+    wiredOpenCasesByType = [];
     wiredClosedCasesByOwner = [];
 
     // Chart configurations
@@ -27,6 +31,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     openCasesByOwnerConfig;
     openCasesByPriorityConfig;
     openCasesByFacilityConfig;
+    openCasesByTypeConfig;
     closedCasesLastThirtyConfig;
 
     // Totals for metric components
@@ -166,9 +171,26 @@ export default class EngineeringCasesDashboard extends LightningElement {
         this.wiredOpenCasesByFacility = result;
         if (result.data) {
             let rows = JSON.parse(JSON.stringify(result.data));
-            const config = baseConfig('horizontalBar');
+            const config = baseConfig('bar');
             config.data = getUnstackedData(rows, 'Facility', 'CaseCount', 'Open Cases');
             this.openCasesByFacilityConfig = config;
+        } else if (result.error) {
+            this.error = result.error;
+            console.error(this.error);
+        }
+    }
+
+    /**
+     * @description Wire aggregate results of open clases by facility name
+     */
+    @wire(getOpenCaseTypeCounts)
+    openCasesByTypeWire(result) {
+        this.wiredOpenCasesByType = result;
+        if (result.data) {
+            let rows = JSON.parse(JSON.stringify(result.data));
+            const config = baseConfig('bar');
+            config.data = getUnstackedData(rows, 'Type', 'CaseCount', 'Open Cases');
+            this.openCasesByTypeConfig = config;
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
@@ -183,6 +205,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
         refreshApex(this.wiredOpenCasesByOwner);
         refreshApex(this.wiredOpenCasesByPriority);
         refreshApex(this.wiredOpenCasesByFacility);
+        refreshApex(this.wiredOpenCasesByType);
         refreshApex(this.wiredClosedCasesByOwner);
     }
 
