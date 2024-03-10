@@ -11,11 +11,13 @@ export default class EngineeringCasesDashboard extends LightningElement {
     // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
     wiredOpenCasesByOwner = [];
+    wiredOpenCasesByPriority = [];
     wiredClosedCasesByOwner = [];
 
     // Chart configurations
     openCasesByStatusConfig;
     openCasesByOwnerConfig;
+    openCasesByPriorityConfig;
     closedCasesLastThirtyConfig;
 
     // Totals for metric components
@@ -173,16 +175,18 @@ export default class EngineeringCasesDashboard extends LightningElement {
             }));
 
             // Create chart config for stacked bar chart
-            const config = this.baseConfig('horizontalBar');
+            const config = this.baseConfig('bar', true);
             config.data.datasets = datasets;
             config.data.labels = [...owners];
+            /*
             config.options.scales = {
-                x: { 
+                xAxes: { 
                     stacked: true, 
                     beginAtZero: true 
                 },
-                y: { stacked: true }
+                yAxes: { stacked: true }
             }
+            */
             this.openCasesByOwnerConfig = config;
         } else if (result.error) {
             this.error = result.error;
@@ -208,7 +212,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
      * @param {String} chartType 
      * @returns configuration for a chart js component
      */
-    baseConfig(chartType) {
+    baseConfig(chartType, stacked = false) {
         const chartConfig = {
             type: chartType,
             data: {
@@ -234,7 +238,12 @@ export default class EngineeringCasesDashboard extends LightningElement {
         }
         else if (chartType === 'bar') {
             chartConfig.options.scales = {
+                xAxes: [{ 
+                    stacked: stacked
+                }],
                 yAxes: [{
+                    stacked: stacked,
+                    beginAtZero: true, 
                     ticks: {
                         beginAtZero: true,
                         stepSize: 1
@@ -244,11 +253,16 @@ export default class EngineeringCasesDashboard extends LightningElement {
         }
         else if (chartType === 'horizontalBar') {
             chartConfig.options.scales = {
-                xAxes: [{
+                xAxes: [{ 
+                    stacked: stacked, 
+                    beginAtZero: true, 
                     ticks: {
                         beginAtZero: true,
                         stepSize: 1
                     }
+                }],
+                yAxes: [{
+                    stacked: stacked
                 }]
             };
         }
