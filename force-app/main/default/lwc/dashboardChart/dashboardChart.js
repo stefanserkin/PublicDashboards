@@ -94,6 +94,15 @@ export default class DashboardChart extends LightningElement {
             base64: image.split(',')[1], 
             fileName: `${this.chartTitle}`
         });
+        if (saveResult) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success',
+                    message: `The image was saved as a Salesforce File. Record ID: ${saveResult}`,
+                    variant: 'success',
+                })
+            );
+        }
     }
 
 }
