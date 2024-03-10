@@ -52,7 +52,6 @@ export default class DashboardChart extends LightningElement {
         Promise.all([loadScript(this, chartjs)])
             .then(() => {
                 this.chartjsInitialized = true;
-                console.log(Chart.version);
                 this.updateChart();
             })
             .catch(error => {
@@ -85,13 +84,11 @@ export default class DashboardChart extends LightningElement {
 
     /**
      * @description Generates a base64 image of the chart and saves it as a file
-     * TODO - Do something about the result - download image to browser? just tell the user it worked? Something.
      * @returns {Promise}
      */
     async generateImage() {
         this.isLoading = true;
         const image = this.chart.toBase64Image();
-        console.log(image);
         const saveResult = await saveAsImage({
             base64: image.split(',')[1], 
             fileName: `${this.chartTitle}`

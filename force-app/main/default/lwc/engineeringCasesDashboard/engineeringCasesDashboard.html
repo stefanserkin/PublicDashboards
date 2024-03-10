@@ -21,21 +21,21 @@
                     less-is-more
                 ></c-dashboard-metric>
             </lightning-layout-item>
-            <!-- IN PROGRESS CASES TOTAL -->
-            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
-                <c-dashboard-metric
-                    title="Cases In Progress"
-                    value={totalInProgressCases}
-                    min-mid-range=1
-                    min-top-range=1
-                    less-is-more
-                ></c-dashboard-metric>
-            </lightning-layout-item>
             <!-- UNASSIGNED CASES TOTAL -->
             <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
                 <c-dashboard-metric
                     title="Unassigned Cases"
                     value={totalUnassignedCases}
+                    min-mid-range=1
+                    min-top-range=1
+                    less-is-more
+                ></c-dashboard-metric>
+            </lightning-layout-item>
+            <!-- IN PROGRESS CASES TOTAL -->
+            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
+                <c-dashboard-metric
+                    title="Cases In Progress"
+                    value={totalInProgressCases}
                     min-mid-range=1
                     min-top-range=1
                     less-is-more
@@ -56,7 +56,6 @@
                 <c-dashboard-chart lwc:if={openCasesByStatusConfig}
                     config={openCasesByStatusConfig}
                     title="Open Cases by Status"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
         </lightning-layout>
@@ -68,7 +67,6 @@
                 <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
                     config={closedCasesLastThirtyConfig}
                     title="Closed Cases - Last 30 Days"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
             <!-- CLOSED CASES BY OWNER -->
@@ -76,7 +74,6 @@
                 <c-dashboard-chart lwc:if={openCasesByOwnerConfig}
                     config={openCasesByOwnerConfig}
                     title="Assigned Cases"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
             <!-- OPEN CASES BY PRIORITY -->
@@ -84,7 +81,6 @@
                 <c-dashboard-chart lwc:if={openCasesByPriorityConfig}
                     config={openCasesByPriorityConfig}
                     title="Open Cases by Priority"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
         </lightning-layout>
@@ -96,7 +92,6 @@
                 <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
                     config={openCasesByFacilityConfig}
                     title="Open Cases by Facility"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
             <!-- OPEN CASES BY TYPE -->
@@ -104,7 +99,6 @@
                 <c-dashboard-chart lwc:if={openCasesByTypeConfig}
                     config={openCasesByTypeConfig}
                     title="Open Cases by Type"
-                    show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
         </lightning-layout>
