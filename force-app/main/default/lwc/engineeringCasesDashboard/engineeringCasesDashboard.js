@@ -16,8 +16,6 @@ export default class EngineeringCasesDashboard extends LightningElement {
     error;
     intervalId;
 
-    locationNames = ['Upper East Side','Battery Park City'];
-
     // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
     wiredOpenCasesByOwner = [];
