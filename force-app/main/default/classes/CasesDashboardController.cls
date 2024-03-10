@@ -27,6 +27,32 @@ public without sharing class CasesDashboardController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getOpenCasePriorityCounts() {
+        return [
+            SELECT Priority, Status, COUNT(Id) CaseCount 
+              FROM Case 
+             WHERE RecordType.Name = 'Engineering' 
+               AND IsClosed = false 
+              WITH SYSTEM_MODE
+             GROUP BY Priority, Status
+             ORDER BY COUNT(Id) DESC
+        ];
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getOpenCaseFacilityCounts() {
+        return [
+            SELECT Facility__r.Name Facility, COUNT(Id) CaseCount 
+              FROM Case 
+             WHERE RecordType.Name = 'Engineering' 
+               AND IsClosed = false 
+              WITH SYSTEM_MODE
+             GROUP BY Facility__r.Name
+             ORDER BY COUNT(Id) DESC
+        ];
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<AggregateResult> getClosedCasesLastThirtyDays() {
         return [
             SELECT Owner.Name CaseOwner, COUNT(Id) CaseCount 

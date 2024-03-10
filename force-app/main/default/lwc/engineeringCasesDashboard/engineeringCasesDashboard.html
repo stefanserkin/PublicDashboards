@@ -67,6 +67,14 @@
                     show-download
                 ></c-dashboard-chart>
             </lightning-layout-item>
+            <!-- OPEN CASES BY PRIORITY -->
+            <lightning-layout-item size="4">
+                <c-dashboard-chart lwc:if={openCasesByPriorityConfig}
+                    config={openCasesByPriorityConfig}
+                    title="Open Cases by Priority"
+                    show-download
+                ></c-dashboard-chart>
+            </lightning-layout-item>
         </lightning-layout>
     </lightning-card>
 </template>
