@@ -8,18 +8,6 @@
     padding: 0;
 }
 
-.dash-metric-chart {
-    display: inline-block;
-    width: 10rem;
-    height: 10rem;
-    margin: 0;
-    padding: 0;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #f5f5f5;
-    text-align: center;
-}
-
 .dash-metric-value {
     display: block;
     margin: 0;
@@ -28,12 +16,14 @@
     font-weight: bold;
 }
 
-.dash-metric-label {
-    display: block;
-    margin: 0;
-    padding: 0.5rem 0 0 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #555;
-    text-transform: uppercase;
+.low-range {
+    color: #C23934;
+}
+
+.mid-range {
+    color: #FFB75C;
+}
+
+.top-range {
+    color: #01716B;
 }
