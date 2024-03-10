@@ -5,6 +5,10 @@
 // You can also execute the entire file by running the command:
 //     SFDX: Execute Anonymous Apex with Editor Contents
 
-string tempvar = 'Enter_your_name_here';
-System.debug('Hello World!');
-System.debug('My name is ' + tempvar);
+String invalidString = 'not_a_valid_base64_string';
+try {
+   String fileid = CasesDashboardController.saveAsImage(invalidString, 'fileName');
+} catch (Exception e) {
+    System.debug('::::: exception --> ' + e.getMessage());
+}
+
