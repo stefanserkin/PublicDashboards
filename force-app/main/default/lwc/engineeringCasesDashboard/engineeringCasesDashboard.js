@@ -1,10 +1,13 @@
 import { LightningElement, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from "@salesforce/apex";
 import { 
     baseConfig, 
     getUnstackedData, 
     getStackedData
 } from 'c/dashboardUtil';
+import isPasswordProtected from '@salesforce/apex/CasesDashboardController.isPasswordProtected';
+import authorizeSession from '@salesforce/apex/CasesDashboardController.authorizeSession';
 import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseStatusCounts';
 import getOpenCaseOwnerCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseOwnerCounts';
 import getOpenCasePriorityCounts from '@salesforce/apex/CasesDashboardController.getOpenCasePriorityCounts';
@@ -15,6 +18,7 @@ import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardControl
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
     intervalId;
+    isLoading = false;
 
     // Store wired results so they can be refreshed
     wiredOpenCasesByStatus = [];
@@ -38,6 +42,16 @@ export default class EngineeringCasesDashboard extends LightningElement {
     totalInProgressCases = 0;
     totalAwaitingReplyCases = 0;
 
+    // Password protection
+    isPasswordProtected = true;
+    isAuthorized = false;
+    password;
+    lwcName;
+
+    get hasDashboardAccess() {
+        return !this.isPasswordProtected || this.isAuthorized;
+    }
+
     /****************************************
      * Lifecycle hooks
      ****************************************/
@@ -47,9 +61,24 @@ export default class EngineeringCasesDashboard extends LightningElement {
      * to automatically update the charts.
      */
     connectedCallback() {
+        this.isLoading = true;
         this.intervalId = setInterval(() => {
             this.refreshComponents();
         }, 5000);
+        
+        // Store the name of the current component
+        this.lwcName = this.getComponentName();
+
+        // Check for password protection
+        isPasswordProtected({lwcName: 'engineeringCasesDashboard'})
+            .then(result => {
+                this.isPasswordProtected = result;
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.error = error;
+                console.error(this.error);
+            });
     }
 
     /**
@@ -205,6 +234,55 @@ export default class EngineeringCasesDashboard extends LightningElement {
         refreshApex(this.wiredOpenCasesByFacility);
         refreshApex(this.wiredOpenCasesByType);
         refreshApex(this.wiredClosedCasesByOwner);
+    }
+
+    /****************************************
+     * Password protection
+     ****************************************/
+
+    /**
+     * Handle password change event
+     */
+    handlePasswordChange(event) {
+        this.password = event.target.value;
+    }
+
+    /**
+     * Handle submitted password
+     */
+    handleSubmitPassword() {
+        this.isLoading = true;
+        authorizeSession({lwcName: this.lwcName, password: this.password})
+            .then(result => {
+                this.isAuthorized = result == 'success';
+                if (result == 'success') {
+                    this.isAuthorized = true;
+                } else {
+                    this.password = '';
+                    this.dispatchEvent(
+                        new ShowToastEvent({
+                            title: 'Did not authorize',
+                            message: result,
+                            variant: 'warning',
+                        })
+                    );
+                }
+                this.isLoading = false;
+            })
+            .catch(error => {
+                this.error = error;
+                console.error(this.error);
+            });
+    }
+
+    /**
+     * Requests to authenticate require the name of the component
+     */
+    getComponentName() {
+        return this.template.host.localName
+            .split('-')
+            .slice(1)
+            .reduce((a, b) => a + b.charAt(0).toUpperCase() + b.slice(1));
     }
 
 }

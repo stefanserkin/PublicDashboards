@@ -1,6 +1,14 @@
 <template>
     <lightning-card title="Engineering Cases Dashboard" icon-name="standard:service_report">
-        <!-- ACTIONS -->
+        <!-- SPINNER ON LOAD -->
+        <lightning-spinner lwc:if={isLoading}
+            variant="brand"
+            size="large"
+            alternative-text="Loading..."
+            title="Loading..."
+        ></lightning-spinner>
+
+        <!-- ACTIONS 
         <div slot="actions">
             <lightning-button
                 title="Refresh"
@@ -8,99 +16,139 @@
                 onclick={refreshComponents}
             ></lightning-button>
         </div>
+        -->
 
-        <!-- ROW 1 -->
-        <lightning-layout multiple-rows="true">
-            <!-- OPEN CASES TOTAL -->
-            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
-                <c-dashboard-metric
-                    title="Open Cases"
-                    value={totalOpenCases}
-                    min-mid-range=1
-                    min-top-range=1
-                    less-is-more
-                ></c-dashboard-metric>
-            </lightning-layout-item>
-            <!-- UNASSIGNED CASES TOTAL -->
-            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
-                <c-dashboard-metric
-                    title="Unassigned Cases"
-                    value={totalUnassignedCases}
-                    min-mid-range=1
-                    min-top-range=1
-                    less-is-more
-                ></c-dashboard-metric>
-            </lightning-layout-item>
-            <!-- IN PROGRESS CASES TOTAL -->
-            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
-                <c-dashboard-metric
-                    title="Cases In Progress"
-                    value={totalInProgressCases}
-                    min-mid-range=1
-                    min-top-range=1
-                    less-is-more
-                ></c-dashboard-metric>
-            </lightning-layout-item>
-            <!-- AWAITING REPLY CASES TOTAL -->
-            <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
-                <c-dashboard-metric
-                    title="Cases Awaiting Reply"
-                    value={totalAwaitingReplyCases}
-                    min-mid-range=1
-                    min-top-range=1
-                    less-is-more
-                ></c-dashboard-metric>
-            </lightning-layout-item>
-            <!-- OPEN CASES BY STATUS -->
-            <lightning-layout-item size="12" large-device-size="4">
-                <c-dashboard-chart lwc:if={openCasesByStatusConfig}
-                    config={openCasesByStatusConfig}
-                    title="Open Cases by Status"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-        </lightning-layout>
+        <!-- DASHBOARD -->
+        <template lwc:if={hasDashboardAccess}>
+            <!-- ROW 1 -->
+            <lightning-layout multiple-rows="true">
+                <!-- OPEN CASES TOTAL -->
+                <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
+                    <c-dashboard-metric
+                        title="Open Cases"
+                        value={totalOpenCases}
+                        min-mid-range=1
+                        min-top-range=1
+                        less-is-more
+                    ></c-dashboard-metric>
+                </lightning-layout-item>
+                <!-- UNASSIGNED CASES TOTAL -->
+                <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
+                    <c-dashboard-metric
+                        title="Unassigned Cases"
+                        value={totalUnassignedCases}
+                        min-mid-range=1
+                        min-top-range=1
+                        less-is-more
+                    ></c-dashboard-metric>
+                </lightning-layout-item>
+                <!-- IN PROGRESS CASES TOTAL -->
+                <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
+                    <c-dashboard-metric
+                        title="Cases In Progress"
+                        value={totalInProgressCases}
+                        min-mid-range=1
+                        min-top-range=1
+                        less-is-more
+                    ></c-dashboard-metric>
+                </lightning-layout-item>
+                <!-- AWAITING REPLY CASES TOTAL -->
+                <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
+                    <c-dashboard-metric
+                        title="Cases Awaiting Reply"
+                        value={totalAwaitingReplyCases}
+                        min-mid-range=1
+                        min-top-range=1
+                        less-is-more
+                    ></c-dashboard-metric>
+                </lightning-layout-item>
+                <!-- OPEN CASES BY STATUS -->
+                <lightning-layout-item size="12" large-device-size="4">
+                    <c-dashboard-chart lwc:if={openCasesByStatusConfig}
+                        config={openCasesByStatusConfig}
+                        title="Open Cases by Status"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+            </lightning-layout>
+    
+            <!-- ROW 2 -->
+            <lightning-layout multiple-rows="true">
+                <!-- ASSIGNED CASES BY ENGINEER -->
+                <lightning-layout-item size="12" large-device-size="4">
+                    <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
+                        config={closedCasesLastThirtyConfig}
+                        title="Closed Cases - Last 30 Days"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+                <!-- CLOSED CASES BY OWNER -->
+                <lightning-layout-item size="12" large-device-size="4">
+                    <c-dashboard-chart lwc:if={openCasesByOwnerConfig}
+                        config={openCasesByOwnerConfig}
+                        title="Assigned Cases"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+                <!-- OPEN CASES BY PRIORITY -->
+                <lightning-layout-item size="12" large-device-size="4">
+                    <c-dashboard-chart lwc:if={openCasesByPriorityConfig}
+                        config={openCasesByPriorityConfig}
+                        title="Open Cases by Priority"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+            </lightning-layout>
+            
+            <!-- ROW 3 -->
+            <lightning-layout multiple-rows="true">
+                <!-- OPEN CASES BY FACILITY -->
+                <lightning-layout-item size="12" large-device-size="6">
+                    <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
+                        config={openCasesByFacilityConfig}
+                        title="Open Cases by Facility"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+                <!-- OPEN CASES BY TYPE -->
+                <lightning-layout-item size="12" large-device-size="6">
+                    <c-dashboard-chart lwc:if={openCasesByTypeConfig}
+                        config={openCasesByTypeConfig}
+                        title="Cases Opened by Type - Last 30 Days"
+                    ></c-dashboard-chart>
+                </lightning-layout-item>
+            </lightning-layout>
+        </template>
 
-        <!-- ROW 2 -->
-        <lightning-layout multiple-rows="true">
-            <!-- ASSIGNED CASES BY ENGINEER -->
-            <lightning-layout-item size="12" large-device-size="4">
-                <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
-                    config={closedCasesLastThirtyConfig}
-                    title="Closed Cases - Last 30 Days"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-            <!-- CLOSED CASES BY OWNER -->
-            <lightning-layout-item size="12" large-device-size="4">
-                <c-dashboard-chart lwc:if={openCasesByOwnerConfig}
-                    config={openCasesByOwnerConfig}
-                    title="Assigned Cases"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-            <!-- OPEN CASES BY PRIORITY -->
-            <lightning-layout-item size="12" large-device-size="4">
-                <c-dashboard-chart lwc:if={openCasesByPriorityConfig}
-                    config={openCasesByPriorityConfig}
-                    title="Open Cases by Priority"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-        </lightning-layout>
-        
-        <!-- ROW 3 -->
-        <lightning-layout multiple-rows="true">
-            <!-- OPEN CASES BY FACILITY -->
-            <lightning-layout-item size="12" large-device-size="6">
-                <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
-                    config={openCasesByFacilityConfig}
-                    title="Open Cases by Facility"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-            <!-- OPEN CASES BY TYPE -->
-            <lightning-layout-item size="12" large-device-size="6">
-                <c-dashboard-chart lwc:if={openCasesByTypeConfig}
-                    config={openCasesByTypeConfig}
-                    title="Cases Opened by Type - Last 30 Days"
-                ></c-dashboard-chart>
-            </lightning-layout-item>
-        </lightning-layout>
+        <!-- AUTHORIZE -->
+        <template lwc:else>
+            <div class="slds-align_absolute-center authorize-access-container">
+                <lightning-layout multiple-rows="true">
+                    <lightning-layout-item size="12" padding="around-small">
+                        <p class="slds-align_absolute-center">A password is required to access this dashboard.</p>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small"></lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small">
+                        <lightning-input 
+                            type="password" 
+                            label="Password"
+                            name="password" 
+                            placeholder="Enter Password"
+                            required 
+                            onchange={handlePasswordChange}
+                            class="slds-align_absolute-center"
+                        ></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small"></lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small"></lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small">
+                        <lightning-button
+                            variant="brand"
+                            title="Authorize"
+                            label="Authorize"
+                            onclick={handleSubmitPassword}
+                            class="slds-align_absolute-center"
+                        ></lightning-button>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="4" padding="around-small"></lightning-layout-item>
+                </lightning-layout>
+            </div>
+        </template>
     </lightning-card>
+
 </template>

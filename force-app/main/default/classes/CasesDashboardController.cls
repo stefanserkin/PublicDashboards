@@ -10,6 +10,8 @@
  *********************************************/
 public without sharing class CasesDashboardController {
 
+    private static Map<String, Public_Dashboard_Setting__mdt> mapDashboardSettings;
+
     /*********************************************
      * Queries
      *********************************************/
@@ -115,6 +117,61 @@ public without sharing class CasesDashboardController {
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    /*********************************************
+     * @description Check for active password protection for the calling component
+     * @param lwcName Name of the component making the request
+     * @return Boolean indicating if a password is required or not
+     *********************************************/
+    @AuraEnabled
+    public static Boolean isPasswordProtected(
+        String lwcName
+    ) {
+        return dashboardSettingsMap().containsKey(lwcName) && 
+            String.isNotBlank(dashboardSettingsMap().get(lwcName).Password__c);
+    }
+
+    /*********************************************
+     * @description For password-protected dashboards, ensure the user
+     *  has the password configured in Public Dashboard Settings custom metadata.
+     * @param lwcName Name of the component making the request
+     * @param password Password configured in Public Dashboard Settings cmd
+     * @return String 'Success' or exception message
+     *********************************************/
+    @AuraEnabled
+    public static String authorizeSession(
+        String lwcName,
+        String password
+    ) {
+        try {
+            String result;
+            // Verify there is a setting for this component
+            if (!dashboardSettingsMap().containsKey(lwcName)) {
+                result = 'No public dashboard settings record found';
+            } else {
+                // Verify the password
+                if (dashboardSettingsMap().get(lwcName).Password__c != password) {
+                    result = 'Invalid Password';
+                }
+            }
+
+            // Return result
+            return result != null ? result : 'success';
+        } catch (Exception e) {
+            throw new AuraHandledException(e.getMessage());
+        }
+    }
+
+    private static Map<String, Public_Dashboard_Setting__mdt> dashboardSettingsMap() {
+        if (mapDashboardSettings == null) {
+            mapDashboardSettings = new Map<String, Public_Dashboard_Setting__mdt>();
+            List<Public_Dashboard_Setting__mdt> lstSettings = Public_Dashboard_Setting__mdt.getAll().values();
+            for (Public_Dashboard_Setting__mdt pds : lstSettings) {
+                mapDashboardSettings.put(pds.LWC_Name__c, pds);
+            }
+        }
+        return mapDashboardSettings;
     }
 
 }
