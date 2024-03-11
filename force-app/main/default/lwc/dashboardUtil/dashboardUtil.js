@@ -103,7 +103,7 @@ const getUnstackedData = (rows, groupProperty, valueProperty, label) => {
  * @returns data for a chart.js stacked bar chart
  */
 const getStackedData = (rows, groupingProperty, subGroupingProperty, countProperty) => {
-    // Create sets and counts object to track unique owner/status combos
+    // Create sets and counts object to track unique grouping/subgrouping combos
     let groupingVals = new Set();
     let subGroupingVals = new Set();
     let counts = {}; // { groupingVal: { subGroupingVal: count } }

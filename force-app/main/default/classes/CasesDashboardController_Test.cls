@@ -322,6 +322,41 @@ private class CasesDashboardController_Test {
         Assert.isTrue(hasException, 'The method should throw an exception.');
     }
 
+    /**
+     * Test password protected dashboard
+     */
+    @IsTest
+    static void testIsPasswordProtected() {
+        String componentName = 'engineeringCasesDashboard';
+        Test.startTest();
+        Boolean isProtected = CasesDashboardController.isPasswordProtected(componentName);
+        Boolean isNotProtected = CasesDashboardController.isPasswordProtected('iDoNotWork');
+        Test.stopTest();
+        Assert.isTrue(isProtected, 'Engineering dashboard should be protected');
+        Assert.isFalse(isNotProtected, 'Fake lwc name should not be protected');
+    }
+
+    /**
+     * Test verification of password for password protected dashboard
+     */
+    @IsTest
+    static void testAuthorizeSession() {
+        String componentName = 'engineeringCasesDashboard';
+        Public_Dashboard_Setting__mdt dashSetting = [
+            SELECT Password__c FROM Public_Dashboard_Setting__mdt WHERE LWC_Name__c = :componentName LIMIT 1
+        ];
+
+        Test.startTest();
+        String successResult = CasesDashboardController.authorizeSession(componentName, dashSetting.Password__c);
+        String noRecordResult = CasesDashboardController.authorizeSession('invalidName', dashSetting.Password__c);
+        String invalidPasswordResult = CasesDashboardController.authorizeSession(componentName, 'Invalid Password');
+        Test.stopTest();
+
+        Assert.areEqual('success', successResult, 'Should have received a successful response');
+        Assert.areNotEqual('success', noRecordResult, 'Should have received an unsuccessful response');
+        Assert.areNotEqual('success', invalidPasswordResult, 'Should have received an unsuccessful response');
+    }
+
     /**************************************************
      * Utilities
      **************************************************/

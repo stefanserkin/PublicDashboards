@@ -144,25 +144,25 @@ public without sharing class CasesDashboardController {
         String lwcName,
         String password
     ) {
-        try {
-            String result;
-            // Verify there is a setting for this component
-            if (!dashboardSettingsMap().containsKey(lwcName)) {
-                result = 'No public dashboard settings record found';
-            } else {
-                // Verify the password
-                if (dashboardSettingsMap().get(lwcName).Password__c != password) {
-                    result = 'Invalid Password';
-                }
+        String result;
+        // Verify there is a setting for this component
+        if (!dashboardSettingsMap().containsKey(lwcName)) {
+            result = 'No public dashboard settings record found';
+        } else {
+            // Verify the password
+            if (dashboardSettingsMap().get(lwcName).Password__c != password) {
+                result = 'Invalid Password';
             }
-
-            // Return result
-            return result != null ? result : 'success';
-        } catch (Exception e) {
-            throw new AuraHandledException(e.getMessage());
         }
+
+        // Return result
+        return result != null ? result : 'success';
     }
 
+    /*********************************************
+     * @description Get a map of Public Dashboard Setting custom metadata by LWC Name
+     * @return Map of custom metadatas
+     *********************************************/
     private static Map<String, Public_Dashboard_Setting__mdt> dashboardSettingsMap() {
         if (mapDashboardSettings == null) {
             mapDashboardSettings = new Map<String, Public_Dashboard_Setting__mdt>();
