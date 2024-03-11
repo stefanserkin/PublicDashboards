@@ -72,7 +72,6 @@ public without sharing class CasesDashboardController {
             SELECT Type, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false
                AND CreatedDate = LAST_N_DAYS:30
               WITH SYSTEM_MODE
              GROUP BY Type
