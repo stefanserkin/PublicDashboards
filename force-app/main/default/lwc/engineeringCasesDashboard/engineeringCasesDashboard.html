@@ -8,15 +8,25 @@
             title="Loading..."
         ></lightning-spinner>
 
-        <!-- ACTIONS 
+        <!-- ACTIONS -->
         <div slot="actions">
+            <!-- SELECT LOCATION -->
+            <lightning-combobox
+                name="locations"
+                label="Scanning Location"
+                placeholder="Select a Location"
+                onchange={handleLocationChange}
+                options={locationOptions}
+            ></lightning-combobox>
+
+            <!--
             <lightning-button
                 title="Refresh"
                 label="Refresh"
                 onclick={refreshComponents}
             ></lightning-button>
+            -->
         </div>
-        -->
 
         <!-- DASHBOARD -->
         <template lwc:if={hasDashboardAccess}>

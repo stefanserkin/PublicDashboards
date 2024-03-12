@@ -8,6 +8,7 @@ import {
 } from 'c/dashboardUtil';
 import isPasswordProtected from '@salesforce/apex/CasesDashboardController.isPasswordProtected';
 import authorizeSession from '@salesforce/apex/CasesDashboardController.authorizeSession';
+import getLocations from '@salesforce/apex/CasesDashboardController.getLocations';
 import getOpenCaseStatusCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseStatusCounts';
 import getOpenCaseOwnerCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseOwnerCounts';
 import getOpenCasePriorityCounts from '@salesforce/apex/CasesDashboardController.getOpenCasePriorityCounts';
@@ -48,6 +49,13 @@ export default class EngineeringCasesDashboard extends LightningElement {
     password;
     lwcName;
 
+    // Location picklist and selection
+    wiredLocations = [];
+    locationOptions = [];
+    selectedLocationId = 'All';
+    selectedLocationName;
+    recordTypeName = 'Engineering';
+
     get hasDashboardAccess() {
         return !this.isPasswordProtected || this.isAuthorized;
     }
@@ -70,7 +78,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
         this.lwcName = this.getComponentName();
 
         // Check for password protection
-        isPasswordProtected({lwcName: 'engineeringCasesDashboard'})
+        isPasswordProtected({lwcName: this.lwcName})
             .then(result => {
                 this.isPasswordProtected = result;
                 this.isLoading = false;
@@ -78,6 +86,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
             .catch(error => {
                 this.error = error;
                 console.error(this.error);
+                this.isLoading = false;
             });
     }
 
@@ -95,9 +104,35 @@ export default class EngineeringCasesDashboard extends LightningElement {
      ****************************************/
 
     /**
+     * @description Get locations marked available for cases
+     */
+    @wire(getLocations)
+    wiredResult(result) {
+        this.wiredLocations = result;
+        if (result.data) {
+            result.data.forEach(row => {
+                this.locationOptions = [...this.locationOptions, {value: row.Id, label: row.Name}];
+            });
+            this.error = undefined;
+        } else if (result.error) {
+            this.locations = undefined;
+            this.error = result.error;
+            console.error(this.error);
+        }
+    }
+
+    /**
+     * @description Handle location combobox change event
+     */
+    handleLocationChange(event) {
+        this.selectedLocationId = event.detail.value;
+        this.selectedLocationName = event.target.options.find(opt => opt.value === this.selectedLocationId).label;
+    }
+
+    /**
      * @description Wire aggregate results of open cases by case status
      */
-    @wire(getOpenCaseStatusCounts)
+    @wire(getOpenCaseStatusCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByStatusWire(result) {
         this.wiredOpenCasesByStatus = result;
         if (result.data) {
@@ -140,7 +175,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of closed cases in last 30 days by owner
      */
-    @wire(getClosedCasesLastThirtyDays)
+    @wire(getClosedCasesLastThirtyDays, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     closedCasesLastThirtyDaysWire(result) {
         this.wiredClosedCasesByOwner = result;
         if (result.data) {
@@ -157,7 +192,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of open cases by owner
      */
-    @wire(getOpenCaseOwnerCounts)
+    @wire(getOpenCaseOwnerCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByOwnerWire(result) {
         this.wiredOpenCasesByOwner = result;
         if (result.data) {
@@ -175,7 +210,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of open cases by priority
      */
-    @wire(getOpenCasePriorityCounts)
+    @wire(getOpenCasePriorityCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByPriorityWire(result) {
         this.wiredOpenCasesByPriority = result;
         if (result.data) {
@@ -193,7 +228,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of open clases by facility name
      */
-    @wire(getOpenCaseFacilityCounts)
+    @wire(getOpenCaseFacilityCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByFacilityWire(result) {
         this.wiredOpenCasesByFacility = result;
         if (result.data) {
@@ -210,7 +245,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     /**
      * @description Wire aggregate results of open clases by facility name
      */
-    @wire(getOpenCaseTypeCounts)
+    @wire(getOpenCaseTypeCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByTypeWire(result) {
         this.wiredOpenCasesByType = result;
         if (result.data) {

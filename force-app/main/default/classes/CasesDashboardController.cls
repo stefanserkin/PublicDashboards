@@ -15,84 +15,124 @@ public without sharing class CasesDashboardController {
     /*********************************************
      * Queries
      *********************************************/
-    
-    @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getOpenCaseStatusCounts() {
-        return [
-            SELECT Status, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false
-              WITH SYSTEM_MODE
-             GROUP BY Status
-        ];
-    }
 
     @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getOpenCaseOwnerCounts() {
+    public static List<TREX1__Location__c> getLocations() {
         return [
-            SELECT Owner.Name CaseOwner, Status, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false 
-               AND Owner.Type = 'User'
-              WITH SYSTEM_MODE
-             GROUP BY Owner.Name, Status
-             ORDER BY COUNT(Id) DESC
-        ];
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getOpenCasePriorityCounts() {
-        return [
-            SELECT Priority, Status, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false 
-              WITH SYSTEM_MODE
-             GROUP BY Priority, Status
-             ORDER BY COUNT(Id) DESC
+            SELECT Id, Name 
+              FROM TREX1__Location__c 
+             WHERE Available_for_Cases__c = true
+              WITH SYSTEM_MODE 
+             LIMIT 1000
         ];
     }
     
     @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getOpenCaseFacilityCounts() {
-        return [
-            SELECT Facility__r.Name Facility, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = false 
-              WITH SYSTEM_MODE
-             GROUP BY Facility__r.Name
-             ORDER BY COUNT(Id) DESC
-        ];
+    public static List<AggregateResult> getOpenCaseStatusCounts(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Status, COUNT(Id) CaseCount'
+                + ' FROM Case'
+                + ' WHERE IsClosed = false'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Status';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getOpenCaseTypeCounts() {
-        return [
-            SELECT Type, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND CreatedDate = LAST_N_DAYS:30
-              WITH SYSTEM_MODE
-             GROUP BY Type
-             ORDER BY COUNT(Id) DESC
-        ];
+    public static List<AggregateResult> getOpenCaseOwnerCounts(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Owner.Name CaseOwner, Status, COUNT(Id) CaseCount'
+                + ' FROM Case'
+                + ' WHERE IsClosed = false AND Owner.Type = \'User\''
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Owner.Name, Status'
+                + ' ORDER BY COUNT(Id) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<AggregateResult> getClosedCasesLastThirtyDays() {
-        return [
-            SELECT Owner.Name CaseOwner, COUNT(Id) CaseCount 
-              FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
-               AND IsClosed = true
-               AND ClosedDate = LAST_N_DAYS:30
-              WITH SYSTEM_MODE
-             GROUP BY Owner.Name
-             ORDER BY COUNT(Id) DESC
-        ];
+    public static List<AggregateResult> getOpenCasePriorityCounts(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Priority, Status, COUNT(Id) CaseCount'
+                + ' FROM Case'
+                + ' WHERE IsClosed = false'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Priority, Status'
+                + ' ORDER BY COUNT(Id) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getOpenCaseFacilityCounts(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Facility__r.Name Facility, COUNT(Id) CaseCount '
+                + ' FROM Case'
+                + ' WHERE IsClosed = false'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Facility__r.Name'
+                + ' ORDER BY COUNT(Id) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getOpenCaseTypeCounts(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Type, COUNT(Id) CaseCount '
+                + ' FROM Case'
+                + ' WHERE CreatedDate = LAST_N_DAYS:30'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Type'
+                + ' ORDER BY COUNT(Id) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getClosedCasesLastThirtyDays(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT Owner.Name CaseOwner, COUNT(Id) CaseCount '
+                + ' FROM Case'
+                + ' WHERE IsClosed = true'
+                + ' AND ClosedDate = LAST_N_DAYS:30'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (String.isNotBlank(locationId) && locationId != 'All') {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY Owner.Name'
+                + ' ORDER BY COUNT(Id) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
     }
 
     /*********************************************
