@@ -135,7 +135,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of open cases by case status
+     * @description Open cases by case status
      */
     @wire(getOpenCaseStatusCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByStatusWire(result) {
@@ -178,7 +178,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of closed cases in last 30 days by owner
+     * @description Closed cases in last 30 days by owner
      */
     @wire(getClosedCasesLastThirtyDays, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     closedCasesLastThirtyDaysWire(result) {
@@ -195,7 +195,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of open cases by owner
+     * @description Open cases by owner
      */
     @wire(getOpenCaseOwnerCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByOwnerWire(result) {
@@ -213,7 +213,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of open cases by priority
+     * @description Open cases by priority
      */
     @wire(getOpenCasePriorityCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByPriorityWire(result) {
@@ -231,7 +231,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of open clases by facility name
+     * @description Open cases by facility name
      */
     @wire(getOpenCaseFacilityCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByFacilityWire(result) {
@@ -248,7 +248,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * @description Wire aggregate results of open clases by facility name
+     * @description Open cases by facility name
      */
     @wire(getOpenCaseTypeCounts, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
     openCasesByTypeWire(result) {
@@ -299,14 +299,14 @@ export default class EngineeringCasesDashboard extends LightningElement {
      ****************************************/
 
     /**
-     * Handle password change event
+     * @description Handle password change event
      */
     handlePasswordChange(event) {
         this.password = event.target.value;
     }
 
     /**
-     * Handle submitted password
+     * @description Handle submitted password
      */
     handleSubmitPassword() {
         this.isLoading = true;
@@ -333,7 +333,9 @@ export default class EngineeringCasesDashboard extends LightningElement {
     }
 
     /**
-     * Requests to authenticate require the name of the component
+     * @description Provides the name of the component in camelCase
+     *  'c-my-component' --> 'myComponent'
+     * @returns {string} camelCase name of the component
      */
     getComponentName() {
         return this.template.host.localName
