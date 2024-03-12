@@ -118,6 +118,24 @@ public without sharing class CasesDashboardController {
     }
 
     @AuraEnabled(cacheable=true)
+    public static List<AggregateResult> getCasesSubmittedLastThirtyDays(
+        String recordTypeName, 
+        String locationId
+    ) {
+        String query = 'SELECT DAY_ONLY(CreatedDate) SubmittedDate, Count(Id) CaseCount '
+                + ' FROM Case'
+                + ' WHERE CreatedDate = LAST_N_DAYS:30'
+                + ' AND RecordType.Name = :recordTypeName';
+        if (isValidLocationId(locationId)) {
+            query += ' AND Location__c = :locationId';
+        }
+        query += ' GROUP BY DAY_ONLY(CreatedDate)'
+                + ' ORDER BY DAY_ONLY(CreatedDate) DESC';
+
+        return Database.query(query, AccessLevel.SYSTEM_MODE);
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<AggregateResult> getClosedCasesLastThirtyDays(
         String recordTypeName, 
         String locationId

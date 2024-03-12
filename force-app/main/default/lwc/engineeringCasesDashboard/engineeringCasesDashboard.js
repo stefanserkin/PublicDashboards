@@ -14,6 +14,7 @@ import getOpenCaseOwnerCounts from '@salesforce/apex/CasesDashboardController.ge
 import getOpenCasePriorityCounts from '@salesforce/apex/CasesDashboardController.getOpenCasePriorityCounts';
 import getOpenCaseFacilityCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseFacilityCounts';
 import getOpenCaseTypeCounts from '@salesforce/apex/CasesDashboardController.getOpenCaseTypeCounts';
+import getCasesSubmittedLastThirtyDays from '@salesforce/apex/CasesDashboardController.getCasesSubmittedLastThirtyDays';
 import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardController.getClosedCasesLastThirtyDays';
 
 export default class EngineeringCasesDashboard extends LightningElement {
@@ -27,6 +28,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     wiredOpenCasesByPriority = [];
     wiredOpenCasesByFacility = [];
     wiredOpenCasesByType = [];
+    wiredSubmittedCasesLastThirty = [];
     wiredClosedCasesByOwner = [];
 
     // Chart configurations
@@ -35,6 +37,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
     openCasesByPriorityConfig;
     openCasesByFacilityConfig;
     openCasesByTypeConfig;
+    submittedCasesLastThirtyConfig;
     closedCasesLastThirtyConfig;
 
     // Totals for metric components
@@ -250,9 +253,26 @@ export default class EngineeringCasesDashboard extends LightningElement {
         this.wiredOpenCasesByType = result;
         if (result.data) {
             let rows = JSON.parse(JSON.stringify(result.data));
-            const config = baseConfig('bar');
+            const config = baseConfig('horizontalBar');
             config.data = getUnstackedData(rows, 'Type', 'CaseCount', 'Open Cases');
             this.openCasesByTypeConfig = config;
+        } else if (result.error) {
+            this.error = result.error;
+            console.error(this.error);
+        }
+    }
+
+    /**
+     * @description Cases created in last 30 days
+     */
+    @wire(getCasesSubmittedLastThirtyDays, {recordTypeName: '$recordTypeName', locationId: '$selectedLocationId'})
+    casesSubmittedLastThirtyWire(result) {
+        this.wiredSubmittedCasesLastThirty = result;
+        if (result.data) {
+            let rows = JSON.parse(JSON.stringify(result.data));
+            const config = baseConfig('bar');
+            config.data = getUnstackedData(rows, 'SubmittedDate', 'CaseCount', 'Submitted Cases');
+            this.submittedCasesLastThirtyConfig = config;
         } else if (result.error) {
             this.error = result.error;
             console.error(this.error);
