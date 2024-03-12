@@ -299,6 +299,52 @@ private class CasesDashboardController_Test {
             );
         }
     }
+    
+    /**
+     * Test get cases submitted last thirty days
+     */
+    @IsTest
+    static void testGetCasesSubmittedLastThirtyDays() {
+        String groupingProperty = 'SubmittedDate';
+        String countProperty = 'CaseCount';
+
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
+        Test.startTest();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getCasesSubmittedLastThirtyDays(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
+        Test.stopTest();
+
+        // Convert AggregateResults to a map for easier checking
+        Map<String, Integer> resultCountMap = getResultCountMap(
+            aggregateResults, groupingProperty, countProperty
+        );
+
+        List<AggregateResult> expectedResults = [
+            SELECT DAY_ONLY(CreatedDate) SubmittedDate, COUNT(Id) CaseCount 
+              FROM Case 
+             WHERE RecordType.Name = :ENG_RECORD_TYPE_NAME 
+               AND Location__c = :locationId
+               AND CreatedDate = LAST_N_DAYS:30
+              WITH SYSTEM_MODE
+             GROUP BY DAY_ONLY(CreatedDate)
+             ORDER BY DAY_ONLY(CreatedDate) DESC
+        ];
+        Map<String, Integer> expectedCounts = getResultCountMap(
+            expectedResults, groupingProperty, countProperty
+        );
+
+        // Assert that each expected count matches the actual count
+        for (String grouping : expectedCounts.keySet()) {
+            Assert.areEqual(
+                expectedCounts.get(grouping), 
+                resultCountMap.get(grouping), 
+                'Mismatch in count for ' + grouping
+            );
+        }
+    }
 
     /**
      * Test closed cases last 30 days counts by owner
@@ -439,7 +485,13 @@ private class CasesDashboardController_Test {
     ) {
         Map<String, Integer> resultCountMap = new Map<String, Integer>();
         for (AggregateResult ar : aggregateResults) {
-            String groupName = (String)ar.get(groupProperty);
+            String groupName;
+            if (ar.get(groupProperty) instanceof Date) {
+                Date d = (Date)ar.get(groupProperty);
+                groupName = d.format();
+            } else {
+                groupName = (String)ar.get(groupProperty);
+            }
             Integer count = (Integer)ar.get(countProperty);
             resultCountMap.put(groupName, count);
         }

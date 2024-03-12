@@ -22,7 +22,6 @@
 
         <!-- DASHBOARD -->
         <template lwc:if={hasDashboardAccess}>
-            <!-- ROW 1 -->
             <lightning-layout multiple-rows="true">
                 <!-- OPEN CASES TOTAL -->
                 <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
@@ -34,6 +33,7 @@
                         less-is-more
                     ></c-dashboard-metric>
                 </lightning-layout-item>
+
                 <!-- UNASSIGNED CASES TOTAL -->
                 <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
                     <c-dashboard-metric
@@ -44,6 +44,7 @@
                         less-is-more
                     ></c-dashboard-metric>
                 </lightning-layout-item>
+
                 <!-- IN PROGRESS CASES TOTAL -->
                 <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
                     <c-dashboard-metric
@@ -54,6 +55,7 @@
                         less-is-more
                     ></c-dashboard-metric>
                 </lightning-layout-item>
+
                 <!-- AWAITING REPLY CASES TOTAL -->
                 <lightning-layout-item size="12" medium-device-size="3" large-device-size="2">
                     <c-dashboard-metric
@@ -64,6 +66,7 @@
                         less-is-more
                     ></c-dashboard-metric>
                 </lightning-layout-item>
+
                 <!-- OPEN CASES BY STATUS -->
                 <lightning-layout-item size="12" large-device-size="4">
                     <c-dashboard-chart lwc:if={openCasesByStatusConfig}
@@ -71,42 +74,39 @@
                         title="Open Cases by Status"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
-            </lightning-layout>
-    
-            <!-- ROW 2 -->
-            <lightning-layout multiple-rows="true">
+
                 <!-- ASSIGNED CASES BY OWNER -->
-                <lightning-layout-item size="12" large-device-size="3">
+                <lightning-layout-item size="12" medium-device-size="6" large-device-size="3">
                     <c-dashboard-chart lwc:if={openCasesByOwnerConfig}
                         config={openCasesByOwnerConfig}
                         title="Assigned Cases"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
+
                 <!-- OPEN CASES BY PRIORITY -->
-                <lightning-layout-item size="12" large-device-size="3">
+                <lightning-layout-item size="12" medium-device-size="6" large-device-size="3">
                     <c-dashboard-chart lwc:if={openCasesByPriorityConfig}
                         config={openCasesByPriorityConfig}
                         title="Open Cases by Priority"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
+
                 <!-- OPEN CASES BY TYPE -->
-                <lightning-layout-item size="12" large-device-size="3">
+                <lightning-layout-item size="12" medium-device-size="6" large-device-size="3">
                     <c-dashboard-chart lwc:if={openCasesByTypeConfig}
                         config={openCasesByTypeConfig}
                         title="Cases Opened by Type - Last 30 Days"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
+
                 <!-- ASSIGNED CASES BY ENGINEER -->
-                <lightning-layout-item size="12" large-device-size="3">
+                <lightning-layout-item size="12" medium-device-size="6" large-device-size="3">
                     <c-dashboard-chart lwc:if={closedCasesLastThirtyConfig}
                         config={closedCasesLastThirtyConfig}
                         title="Closed Cases - Last 30 Days"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
-            </lightning-layout>
-            
-            <!-- ROW 3 -->
-            <lightning-layout multiple-rows="true">
+
                 <!-- OPEN CASES BY FACILITY -->
                 <lightning-layout-item size="12" large-device-size="6">
                     <c-dashboard-chart lwc:if={openCasesByFacilityConfig}
@@ -114,6 +114,7 @@
                         title="Open Cases by Facility"
                     ></c-dashboard-chart>
                 </lightning-layout-item>
+
                 <!-- SUBMITTED LAST 30 DAYS -->
                 <lightning-layout-item size="12" large-device-size="6">
                     <c-dashboard-chart lwc:if={submittedCasesLastThirtyConfig}
