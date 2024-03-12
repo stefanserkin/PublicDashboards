@@ -36,7 +36,7 @@ public without sharing class CasesDashboardController {
                 + ' FROM Case'
                 + ' WHERE IsClosed = false'
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Status';
@@ -53,7 +53,7 @@ public without sharing class CasesDashboardController {
                 + ' FROM Case'
                 + ' WHERE IsClosed = false AND Owner.Type = \'User\''
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Owner.Name, Status'
@@ -71,12 +71,13 @@ public without sharing class CasesDashboardController {
                 + ' FROM Case'
                 + ' WHERE IsClosed = false'
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Priority, Status'
                 + ' ORDER BY COUNT(Id) DESC';
 
+        System.debug(':::: query --> ' + query);
         return Database.query(query, AccessLevel.SYSTEM_MODE);
     }
     
@@ -89,7 +90,7 @@ public without sharing class CasesDashboardController {
                 + ' FROM Case'
                 + ' WHERE IsClosed = false'
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Facility__r.Name'
@@ -107,7 +108,7 @@ public without sharing class CasesDashboardController {
                 + ' FROM Case'
                 + ' WHERE CreatedDate = LAST_N_DAYS:30'
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Type'
@@ -126,7 +127,7 @@ public without sharing class CasesDashboardController {
                 + ' WHERE IsClosed = true'
                 + ' AND ClosedDate = LAST_N_DAYS:30'
                 + ' AND RecordType.Name = :recordTypeName';
-        if (String.isNotBlank(locationId) && locationId != 'All') {
+        if (isValidLocationId(locationId)) {
             query += ' AND Location__c = :locationId';
         }
         query += ' GROUP BY Owner.Name'
@@ -212,6 +213,16 @@ public without sharing class CasesDashboardController {
             }
         }
         return mapDashboardSettings;
+    }
+
+    /*********************************************
+     * @description Confirm that a provided location id is a valid id
+     * @return Boolean indicating if the location id is valid
+     *********************************************/
+    private static Boolean isValidLocationId(
+        String locationId
+    ) {
+        return locationId != null && String.isNotBlank(locationId) && locationId != 'All';
     }
 
 }

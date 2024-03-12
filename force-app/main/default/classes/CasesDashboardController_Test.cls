@@ -1,23 +1,31 @@
 @IsTest
 private class CasesDashboardController_Test {
 
+    // A Base64 representation of a 1x1 pixel transparent PNG
+    private static final String BASE64_STRING = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wAAAgcB9FvRx14AAAAASUVORK5CYII=';
+
+    // Record type info for engineering cases
+    private static final String ENG_RECORD_TYPE_NAME = 'Engineering';
+    private static Id engineeringRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByDeveloperName()
+                                                    .get(ENG_RECORD_TYPE_NAME).getRecordTypeId();
+
+    // Case property value sets
     private static List<String> statuses = new List<String>{'New', 'In Progress', 'Closed'};
     private static List<String> priorities = new List<String>{'High', 'Medium', 'Low'};
     private static List<String> types = new List<String>{'Electrical', 'Plumbing'};
-
-    private static Id engineeringRecordTypeId = Schema.SObjectType.Case.getRecordTypeInfosByDeveloperName()
-                                                    .get('Engineering').getRecordTypeId();
-
-    // A Base64 representation of a 1x1 pixel transparent PNG
-    private static final String BASE64_STRING = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wAAAgcB9FvRx14AAAAASUVORK5CYII=';
     
     /**
-     * Set up 20 cases with a mix statuses, priorities, and types
+     * Set up 20 engineering cases with a mix of statuses, priorities, and types
      */
     @TestSetup
     static void setupTestData() {
         Contact ct = TestDataFactory.createContacts(1)[0];
         insert ct;
+
+        // Create locations available for cases
+        TREX1__Location__c location = TestDataFactory.createLocations(1)[0];
+        location.Available_for_Cases__c = true;
+        insert location;
 
         // Ensure the 'Engineering' RecordType is available for Cases
         Assert.isNotNull(engineeringRecordTypeId, 'Should have received an Engineering record type for the Case object');
@@ -32,11 +40,28 @@ private class CasesDashboardController_Test {
                 Priority = priorities[Math.mod(i, priorities.size())], // Rotate through priorities
                 Type = types[Math.mod(i, types.size())], // Rotate through types
                 Subject = 'Case ' + i + ' Subject',
-                Description = 'Case ' + i + ' Description'
+                Description = 'Case ' + i + ' Description', 
+                Location__c = location.Id
             );
             caseList.add(newCase);
         }
         insert caseList;
+    }
+
+    /**
+     * Test get locations available for cases
+     */
+    @IsTest
+    static void testGetLocations() {
+        Test.startTest();
+        List<TREX1__Location__c> lstLocations = CasesDashboardController.getLocations();
+        Test.stopTest();
+
+        Assert.areEqual(
+            1, 
+            lstLocations.size(), 
+            'Should have received one Location record'
+        );
     }
 
     /**
@@ -47,8 +72,13 @@ private class CasesDashboardController_Test {
         String groupingProperty = 'Status';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseStatusCounts();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseStatusCounts(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
@@ -60,6 +90,7 @@ private class CasesDashboardController_Test {
             SELECT Status, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
+               AND Location__c = :locationId
                AND IsClosed = false
               WITH SYSTEM_MODE
              GROUP BY Status
@@ -87,8 +118,13 @@ private class CasesDashboardController_Test {
         String subGroupingProperty = 'Status';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseOwnerCounts();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseOwnerCounts(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
@@ -99,7 +135,8 @@ private class CasesDashboardController_Test {
         List<AggregateResult> expectedResults = [
             SELECT Owner.Name CaseOwner, Status, COUNT(Id) CaseCount 
               FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
+             WHERE RecordType.Name = 'Engineering'
+               AND Location__c = :locationId
                AND IsClosed = false 
                AND Owner.Type = 'User'
               WITH SYSTEM_MODE
@@ -129,24 +166,34 @@ private class CasesDashboardController_Test {
         String subGroupingProperty = 'Status';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCasePriorityCounts();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCasePriorityCounts(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
+        System.debug(':::: aggregateresult size --> ' + aggregateResults.size());
+        System.debug(':::: aggregateresults --> ' + aggregateResults);
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
         Map<String, Integer> resultCountMap = getStackedResultCountMap(
             aggregateResults, groupingProperty, subGroupingProperty, countProperty
         );
+        System.debug(':::: resultCountMap --> ' + resultCountMap);
 
         List<AggregateResult> expectedResults = [
             SELECT Priority, Status, COUNT(Id) CaseCount 
               FROM Case 
-             WHERE RecordType.Name = 'Engineering' 
+             WHERE RecordType.Name = 'Engineering'
+               AND Location__c = :locationId 
                AND IsClosed = false 
               WITH SYSTEM_MODE
              GROUP BY Priority, Status
              ORDER BY COUNT(Id) DESC
         ];
+        System.debug(':::: expected --> ' + expectedResults);
         Map<String, Integer> expectedCounts = getStackedResultCountMap(
             expectedResults, groupingProperty, subGroupingProperty, countProperty
         );
@@ -169,8 +216,13 @@ private class CasesDashboardController_Test {
         String groupingProperty = 'Facility';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseFacilityCounts();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseFacilityCounts(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
@@ -182,6 +234,7 @@ private class CasesDashboardController_Test {
             SELECT Facility__r.Name Facility, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
+               AND Location__c = :locationId
                AND IsClosed = false 
               WITH SYSTEM_MODE
              GROUP BY Facility__r.Name
@@ -209,8 +262,13 @@ private class CasesDashboardController_Test {
         String groupingProperty = 'Type';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseTypeCounts();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getOpenCaseTypeCounts(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
@@ -222,6 +280,7 @@ private class CasesDashboardController_Test {
             SELECT Type, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
+               AND Location__c = :locationId
                AND CreatedDate = LAST_N_DAYS:30
               WITH SYSTEM_MODE
              GROUP BY Type
@@ -249,8 +308,13 @@ private class CasesDashboardController_Test {
         String groupingProperty = 'CaseOwner';
         String countProperty = 'CaseCount';
 
+        Id locationId = [SELECT Id FROM TREX1__Location__c LIMIT 1][0].Id;
+
         Test.startTest();
-        List<AggregateResult> aggregateResults = CasesDashboardController.getClosedCasesLastThirtyDays();
+        List<AggregateResult> aggregateResults = CasesDashboardController.getClosedCasesLastThirtyDays(
+            ENG_RECORD_TYPE_NAME, 
+            locationId
+        );
         Test.stopTest();
 
         // Convert AggregateResults to a map for easier checking
@@ -262,6 +326,7 @@ private class CasesDashboardController_Test {
             SELECT Owner.Name CaseOwner, COUNT(Id) CaseCount 
               FROM Case 
              WHERE RecordType.Name = 'Engineering' 
+               AND Location__c = :locationId
                AND IsClosed = true
                AND ClosedDate = LAST_N_DAYS:30
               WITH SYSTEM_MODE
