@@ -19,6 +19,7 @@ import getClosedCasesLastThirtyDays from '@salesforce/apex/CasesDashboardControl
 
 export default class EngineeringCasesDashboard extends LightningElement {
     error;
+    lwcName;
     intervalId;
     isLoading = false;
 
@@ -50,7 +51,6 @@ export default class EngineeringCasesDashboard extends LightningElement {
     isPasswordProtected = true;
     isAuthorized = false;
     password;
-    lwcName;
 
     // Location picklist and selection
     wiredLocations = [];
@@ -73,10 +73,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
      */
     connectedCallback() {
         this.isLoading = true;
-        this.intervalId = setInterval(() => {
-            this.refreshComponents();
-        }, 5000);
-        
+
         // Store the name of the current component
         this.lwcName = this.getComponentName();
 
@@ -91,6 +88,11 @@ export default class EngineeringCasesDashboard extends LightningElement {
                 console.error(this.error);
                 this.isLoading = false;
             });
+        
+        // Set refresh for all charts every 5 seconds
+        this.intervalId = setInterval(() => {
+            this.refreshComponents();
+        }, 5000);
     }
 
     /**
@@ -288,6 +290,7 @@ export default class EngineeringCasesDashboard extends LightningElement {
         refreshApex(this.wiredOpenCasesByPriority);
         refreshApex(this.wiredOpenCasesByFacility);
         refreshApex(this.wiredOpenCasesByType);
+        refreshApex(this.wiredSubmittedCasesLastThirty);
         refreshApex(this.wiredClosedCasesByOwner);
     }
 
