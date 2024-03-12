@@ -309,14 +309,13 @@ export default class EngineeringCasesDashboard extends LightningElement {
         this.isLoading = true;
         authorizeSession({lwcName: this.lwcName, password: this.password})
             .then(result => {
-                this.isAuthorized = result == 'success';
                 if (result == 'success') {
                     this.isAuthorized = true;
                 } else {
                     this.password = '';
                     this.dispatchEvent(
                         new ShowToastEvent({
-                            title: 'Did not authorize',
+                            title: 'Not Authorized',
                             message: result,
                             variant: 'warning',
                         })
